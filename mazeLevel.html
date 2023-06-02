@@ -267,7 +267,7 @@
             let rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape, localInertia);
             let body = new Ammo.btRigidBody(rbInfo);
 
-            body.setFriction(1);
+            body.setFriction(0.1);
             body.setRollingFriction(friction);
 
             body.setActivationState(STATE.DISABLE_DEACTIVATION)
@@ -286,11 +286,32 @@
         
             //Walls
             //PosX, PosY, PosZ, RotX, RotY, RotZ, ScaleX, ScaleY, ScaleZ, RotW, ObjMass
-            createBox(-5,5,-50,0,0,0,90,12,1,1,1);//border wall 1
-            createBox(0,5,50,0,0,0,100,12,2,1,1);
-            /*createBox(-50,0,-5,0,0,0,1,30,90,1,1);
-            createBox(50,0,5,0,0,0,1,30,90,1,1);*/
-            
+            createBox(-5,5,-50,0,0,0,90,12,3,1,1);//border wall 1 furthest
+            createBox(5,5,50,0,0,0,90,12,3,1,1);//border wall 2 closest
+            createBox(-50,5,-5,0,0,0,3,12,90,1,1);//border wall 3 left side
+            createBox(50,5,5,0,0,0,3,12,90,1,1);//border wall 4 right side
+
+            //maze walls
+            //from bottom to top
+            createBox(-38.5,5,35,0,0,0,3,12,30,1,1);//1st maze wall vertical
+            createBox(-25,5,5,0,0,0,50,12,3,1,1);//2nd maze wall horizontal
+            createBox(-38,5,-30,0,0,0,3,12,40,1,1);//3rd maze wall vertical
+            createBox(-20,5,20,0,0,0,3,12,30,1,1);//4th maze wall vertical
+            createBox(-31,5,-25,0,0,0,12,12,3,1,1);//5th maze wall horizontal
+            createBox(-24,5,-31,0,0,0,3,12,15,1,1);//6th maze wall vertical
+            createBox(-1.5,5,35,0,0,0,3,12,30,1,1);//7th maze wall vertical
+            createBox(-5,5,-12,0,0,0,35,12,3,1,1);//8th maze wall horizontal
+            createBox(-7,5,-37,0,0,0,3,12,25,1,1);//9th maze wall vertical
+            createBox(12,5,5,0,0,0,3,12,60,1,1);//10th maze wall vertical
+            createBox(18,5,-37,0,0,0,15,12,3,1,1);//11th maze wall horizontal
+            createBox(33,5,27,0,0,0,3,12,15,1,1);//12th maze wall vertical
+            createBox(23,5,7,0,0,0,22,12,3,1,1);//13th Maze wall horizontal
+            createBox(31,5,-10,0,0,0,40,12,3,1,1);//14th maze wall horizontal
+            createBox(30,5,-23,0,0,0,15,12,3,1,1);//15th maze wall horizontal
+            createBox(24,5,-30,0,0,0,3,12,15,1,1);//16th maze wall vertical
+            createBox(40,5,20,0,0,0,17,12,3,1,1);//17th maze wall horizontal
+            createBox(38.5,5,-36,0,0,0,3,12,29,1,1);//18th maze wall vertical
+
             //Ball
             //PosX, PosY, PosZ, Size, Mass, Friction
             createBall(0, 4, 0, 2, 1, 1);
