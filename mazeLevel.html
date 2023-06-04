@@ -11,6 +11,8 @@
   <link rel="stylesheet" href="styles.css" />
 
   <body>
+    <audio id="background-music" src="background_music.mp3" loop></audio>
+
     <div id="timer-container"><div id="timer">00:00</div></div>
 
     <script type="importmap">
@@ -62,6 +64,8 @@
       let ammoTmpPos = null,
         ammoTmpQuat = null;
       let controls;
+      let audioContext;
+    let backgroundMusic;
       //create clock for timing
       const clock = new THREE.Clock();
 
@@ -80,8 +84,10 @@
         setupPhysicsWorld();
 
         setupGraphics();
+        initAudio();
         createLevel();
-        collisionDetection();
+        setupContactPairResultCallback();
+        
 
         setupEventHandlers();
         startTimer();
@@ -115,7 +121,7 @@
           0.2,
           5000
         );
-        camera.position.set(0, 30, 70);
+        camera.position.set(0, 100, 70);
         camera.lookAt(new THREE.Vector3(0, 0, 0));
 
         //Add hemisphere light
@@ -159,12 +165,33 @@
         renderer.shadowMap.enabled = true;
 
         controls = new OrbitControls(camera, renderer.domElement);
-      }
+        
+        
+    }
+
+    function initAudio() {
+  audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+  const audioElement = document.getElementById("background-music");
+  const audioSource = audioContext.createMediaElementSource(audioElement);
+
+  backgroundMusic = audioContext.createGain();
+  audioSource.connect(backgroundMusic);
+  backgroundMusic.connect(audioContext.destination);
+
+  audioElement.play().catch(function (err) {
+    console.warn("Audio playback was prevented:", err);
+  });
+}
 
       function renderFrame() {
+        if (backgroundMusic && !backgroundMusic.gain.value) {
+        backgroundMusic.gain.value = 0.2; // Adjust the volume here (0.0 to 1.0)
+}
         let deltaTime = clock.getDelta();
 
         moveBall();
+        //contact();
 
         updatePhysics(deltaTime);
 
@@ -201,6 +228,8 @@
         if (countdownMinutes === 0 && countdownSeconds === 0) {
           clearInterval(countdownInterval);
           // Timer has reached 0, perform any desired actions here
+          const audioElement = document.getElementById("background-music");
+        audioElement.pause();
         }
       }
       function setupEventHandlers() {
@@ -293,10 +322,10 @@
         let mass = objMass;
 
         //threeJS Section
-        let ball = (ballObject = new THREE.Mesh(
+        let ball = ballObject = new THREE.Mesh(
           new THREE.SphereGeometry(radius),
           new THREE.MeshPhongMaterial({ color: 0xff0505 })
-        ));
+        );
 
         ball.position.set(pos.x, pos.y, pos.z);
 
@@ -338,6 +367,8 @@
 
         ball.userData.physicsBody = body;
         rigidBodies.push(ball);
+        //console.log(typeof Ammo);
+
       }
 
       function createLevel() {
@@ -378,7 +409,7 @@
 
         //Ball
         //PosX, PosY, PosZ, Size, Mass, Friction
-        createBall(45, 20, -35, 2, 1, 1);
+        createBall(-47, 20, 40, 2, 1, 1);
       }
 
       function createBox(
@@ -453,6 +484,8 @@
 
         physicsWorld.addRigidBody(body);
         boxObject.userData.physicsBody = body;
+        //console.log(typeof Ammo);
+
       }
 
       function createWinBox(
@@ -524,42 +557,12 @@
 
         physicsWorld.addRigidBody(body);
         winBoxObject.userData.physicsBody = body;
+        //console.log(typeof Ammo);
+        //console.log(Ammo.ConcreteContactResultCallback);
+        //console.log(Ammo.btManifoldPoint);
+
+
       }
-
-      /*function setupContactPairResultCallback() {
-        let dispatcher = physicsWorld.getDispatcher();
-        let numManifolds = dispatcher.getNumManifolds();
-
-        // Iterate through all the manifolds
-        for (let i = 0; i < numManifolds; i++) {
-          let contactManifold = dispatcher.getManifoldByIndexInternal(i);
-          let numContacts = contactManifold.getNumContacts();
-
-          // Iterate through all the contacts in the manifold
-          for (let j = 0; j < numContacts; j++) {
-            let contactPoint = contactManifold.getContactPoint(j);
-            let distance = contactPoint.getDistance();
-
-            if (distance <= 0) {
-              let colObj0 = contactManifold.getBody0();
-              let colObj1 = contactManifold.getBody1();
-
-              let rb0 = Ammo.castObject(colObj0, Ammo.btRigidBody);
-              let rb1 = Ammo.castObject(colObj1, Ammo.btRigidBody);
-
-              if (
-                rb0.userData === ballObject.userData ||
-                rb1.userData === ballObject.userData
-              ) {
-                console.log("You win");
-              }
-
-              console.log("first object:", rb0.userData);
-              console.log("second object:", rb1.userData);
-            }
-          }
-        }
-      }*/
 
       function moveBall() {
         //Move force
@@ -632,10 +635,11 @@
             this.hasContact = true;
             
             }
+            
 
         }
 
-        function collisionDetection(){
+        function contact(){
             cbContactPairResult.hasContact = false;
 
             physicsWorld.contactPairTest(
@@ -647,6 +651,7 @@
                 if(!cbContactPairResult.hasContact) return;
 
         }
+        
       function updatePhysics(deltaTime) {
         // Step world
         physicsWorld.stepSimulation(deltaTime, 10);
@@ -665,7 +670,7 @@
           }
         }
 
-        setupContactPairResultCallback();
+        
       }
     </script>
   </body>
