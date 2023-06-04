@@ -81,6 +81,7 @@
 
         setupGraphics();
         createLevel();
+        collisionDetection();
 
         setupEventHandlers();
         startTimer();
@@ -174,7 +175,7 @@
         requestAnimationFrame(renderFrame);
       }
 
-      let countdownMinutes = 3;
+      let countdownMinutes = 1;
       let countdownSeconds = 0;
       let countdownInterval;
 
@@ -525,7 +526,7 @@
         winBoxObject.userData.physicsBody = body;
       }
 
-      function setupContactPairResultCallback() {
+      /*function setupContactPairResultCallback() {
         let dispatcher = physicsWorld.getDispatcher();
         let numManifolds = dispatcher.getNumManifolds();
 
@@ -558,7 +559,7 @@
             }
           }
         }
-      }
+      }*/
 
       function moveBall() {
         //Move force
@@ -617,7 +618,35 @@
 
         }
         */
+    //collision detection
+    function setupContactPairResultCallback(){
+            cbContactPairResult = new Ammo.ConcreteContactResultCallback();
+            cbContactPairResult.hasContact = false;
 
+            cbContactPairResult.addSingleResult = function(cp, colObj0Wrap, partId0, index0, colObj1Wrap, partId1, index1){
+            let contactPoint = Ammo.wrapPointer (cp, Ammo.btManifoldPoint);
+            
+            const distance = contactPoint.getDistance();
+
+            if(distance>0) return;
+            this.hasContact = true;
+            
+            }
+
+        }
+
+        function collisionDetection(){
+            cbContactPairResult.hasContact = false;
+
+            physicsWorld.contactPairTest(
+                ball.userData.physicsBody,
+                winBoxObject.userData.physicsBody,
+                cbContactPairResult);
+                //console.log(cbContactPairResult);
+
+                if(!cbContactPairResult.hasContact) return;
+
+        }
       function updatePhysics(deltaTime) {
         // Step world
         physicsWorld.stepSimulation(deltaTime, 10);
