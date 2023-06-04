@@ -337,7 +337,7 @@
             createBox(38.5,5,-36,0,0,0,3,12,29,1,1);//18th maze wall vertical
 
             //win condition
-            createWinBox(50,0,-50,0,0,0,17,2,17,1,1)
+            createWinBox(50,0.01,-50,0,0,0,17,2,17,1,1)
 
             //Ball
             //PosX, PosY, PosZ, Size, Mass, Friction
@@ -416,7 +416,6 @@
             vertexShader: document.getElementById("vertexShader").textContent,
             fragmentShader: document.getElementById("fragmentShader").textContent,
         }));
-
         winBoxObject.position.set(pos.x, pos.y, pos.z);
         winBoxObject.scale.set(scale.x, scale.y, scale.z);
 
