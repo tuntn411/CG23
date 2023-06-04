@@ -332,8 +332,18 @@
             let mass = objMass;
 
             //threeJS Section
-            boxObject = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshPhongMaterial({ color: 0xa0afa4 }));
+            var map = new THREE.TextureLoader().load("map.png");
+            
+            var bmap = new THREE.TextureLoader().load("bmap.png");
 
+            boxObject = new THREE.Mesh(
+                new THREE.BoxGeometry(),
+                new THREE.MeshPhongMaterial({
+                bumpMap: bmap,
+                bumpScale: 1,
+                map: map
+                })
+                );
             boxObject.position.set(pos.x, pos.y, pos.z);
             boxObject.scale.set(scale.x, scale.y, scale.z);
 
