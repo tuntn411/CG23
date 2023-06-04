@@ -58,7 +58,6 @@
         const STATE = { DISABLE_DEACTIVATION: 4 }
 
         const FLAGS = { CF_KINEMATIC_OBJECT: 2 }
-
         
         //Ammojs Initialization
         Ammo().then(start)
@@ -457,6 +456,7 @@
         let dispatcher = physicsWorld.getDispatcher();
         let numManifolds = dispatcher.getNumManifolds();
 
+
         // Iterate through all the manifolds
         for (let i = 0; i < numManifolds; i++) {
             let contactManifold = dispatcher.getManifoldByIndexInternal(i);
@@ -471,12 +471,15 @@
                     let colObj0 = contactManifold.getBody0();
                     let colObj1 = contactManifold.getBody1();
 
-                    let userData0 = colObj0.getUserData();
-                    let userData1 = colObj1.getUserData();
+                    let rb0 = Ammo.castObject( colObj0, Ammo.btRigidBody );
+                    let rb1 = Ammo.castObject( colObj1, Ammo.btRigidBody );
 
-                    if (userData0 === ballObject.userData || userData1 === ballObject.userData) {
+                    if (rb0.userData === ballObject.userData || rb1.userData === ballObject.userData) {
                         console.log("You win");
                     }
+
+                    console.log("first object:", rb0.userData);
+                    console.log("second object:", rb1.userData);
                 }
             }
         }
@@ -569,7 +572,7 @@
                 }
             }
 
-            //setupContactPairResultCallback();
+            setupContactPairResultCallback();
 
         }
 
