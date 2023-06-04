@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="styles.css" />
 
   <body>
-
+    <audio id="background-music" src="background_music.mp3" loop></audio>
 
     <div id="timer-container"><div id="timer">00:00</div></div>
 
@@ -23,6 +23,14 @@
         }
       }
     </script>
+    <script>
+        const audio = document.getElementById('background-music');
+      
+        document.addEventListener('keydown', () => {
+          audio.play();
+          document.removeEventListener('keydown', startAudioPlayback); // Remove the event listener after the first user interaction
+        });
+      </script>
     <script src="build/ammo.js"></script>
     <script id="fragmentShader" type="x-shader/x-fragment">
       varying vec3 v_Normal;
