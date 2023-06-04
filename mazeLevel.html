@@ -19,6 +19,26 @@
 	}
     </script>
     <script src="build/ammo.js"></script>
+    <script id="fragmentShader" type="x-shader/x-fragment">
+        varying vec3 v_Normal;
+        varying vec3 v_Position;
+    
+        void main() {
+            vec3 color = normalize(v_Position) * 0.5 + 0.5; 
+            gl_FragColor = vec4(color, 1.0); 
+        }
+    </script>
+    <script id="vertexShader" type="x-shader/x-vertex">
+        varying vec3 v_Normal;
+        varying vec3 v_Position;
+    
+        void main()
+        {
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            v_Normal = normal;
+            v_Position = position;
+        }
+    </script>
     <script type="module">
         //Potential local coop idea - Player1 controls ball, Player2 controls map
         import * as THREE from 'three';
@@ -389,7 +409,13 @@
         let mass = objMass;
 
         //threeJS Section
-        let winBoxObject = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshPhongMaterial({ color: 0xa0afa4 }));
+        let winBoxObject = new THREE.Mesh(
+            new THREE.BoxGeometry(), 
+            new THREE.ShaderMaterial({
+            uniforms: {},
+            vertexShader: document.getElementById("vertexShader").textContent,
+            fragmentShader: document.getElementById("fragmentShader").textContent,
+        }));
 
         winBoxObject.position.set(pos.x, pos.y, pos.z);
         winBoxObject.scale.set(scale.x, scale.y, scale.z);
