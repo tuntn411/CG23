@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="styles.css" />
 
   <body>
-    <audio id="background-music" src="background_music.mp3" loop></audio>
+
 
     <div id="timer-container"><div id="timer">00:00</div></div>
 
@@ -64,8 +64,7 @@
       let ammoTmpPos = null,
         ammoTmpQuat = null;
       let controls;
-      let audioContext;
-    let backgroundMusic;
+
       //create clock for timing
       const clock = new THREE.Clock();
 
@@ -84,7 +83,7 @@
         setupPhysicsWorld();
 
         setupGraphics();
-        initAudio();
+
         createLevel();
         setupContactPairResultCallback();
         
@@ -169,25 +168,9 @@
         
     }
 
-    function initAudio() {
-  audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-  const audioElement = document.getElementById("background-music");
-  const audioSource = audioContext.createMediaElementSource(audioElement);
-
-  backgroundMusic = audioContext.createGain();
-  audioSource.connect(backgroundMusic);
-  backgroundMusic.connect(audioContext.destination);
-
-  audioElement.play().catch(function (err) {
-    console.warn("Audio playback was prevented:", err);
-  });
-}
 
       function renderFrame() {
-        if (backgroundMusic && !backgroundMusic.gain.value) {
-        backgroundMusic.gain.value = 0.2; // Adjust the volume here (0.0 to 1.0)
-}
+       
         let deltaTime = clock.getDelta();
 
         moveBall();
