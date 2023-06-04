@@ -27,6 +27,8 @@
         let physicsWorld, scene, camera, renderer, rigidBodies = [], tmpTrans = null
         let ballObject = null, moveDirection = { left: 0, right: 0, forward: 0, back: 0 }
         let boxObject = null
+        let winBoxObject = null
+        let cbContactPairResult;
         //let kObject = null, kMoveDirection = { left: 0, right: 0, forward: 0, back: 0 }, tmpPos = new THREE.Vector3(), tmpQuat = new THREE.Quaternion();
         let ammoTmpPos = null, ammoTmpQuat = null;
         let controls;
@@ -51,6 +53,7 @@
 
             setupGraphics();
             createLevel();
+            setupContactPairResultCallback();
 
             setupEventHandlers();
             renderFrame();
@@ -273,6 +276,7 @@
             body.setActivationState(STATE.DISABLE_DEACTIVATION)
 
 
+            body.setCollisionFlags(0);
             physicsWorld.addRigidBody(body);
 
             ball.userData.physicsBody = body;
@@ -312,9 +316,12 @@
             createBox(40,5,20,0,0,0,17,12,3,1,1);//17th maze wall horizontal
             createBox(38.5,5,-36,0,0,0,3,12,29,1,1);//18th maze wall vertical
 
+            //win condition
+            createWinBox(50,0,-50,0,0,0,17,2,17,1,1)
+
             //Ball
             //PosX, PosY, PosZ, Size, Mass, Friction
-            createBall(0, 4, 0, 2, 1, 1);
+            createBall(45, 4, -35, 2, 1, 1);
         }
 
         function createBox(posX, posY, posZ, rotX, rotY, rotZ, scaleX, scaleY, scaleZ, rotW, objMass) {
@@ -363,6 +370,85 @@
 
             
         }
+
+        function createWinBox(posX, posY, posZ, rotX, rotY, rotZ, scaleX, scaleY, scaleZ, rotW, objMass) {
+
+        let pos = { x: posX, y: posY, z: posZ };
+        let scale = { x: scaleX, y: scaleY, z: scaleZ };
+        let quat = { x: rotX, y: rotY, z: rotZ, w: rotW };
+        let mass = objMass;
+
+        //threeJS Section
+        let winBoxObject = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshPhongMaterial({ color: 0xa0afa4 }));
+
+        winBoxObject.position.set(pos.x, pos.y, pos.z);
+        winBoxObject.scale.set(scale.x, scale.y, scale.z);
+
+        winBoxObject.castShadow = true;
+        winBoxObject.receiveShadow = true;
+
+        scene.add(winBoxObject);
+
+        //Ammojs Section
+        let transform = new Ammo.btTransform();
+        transform.setIdentity();
+        transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
+        transform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
+        let motionState = new Ammo.btDefaultMotionState(transform);
+
+        let colShape = new Ammo.btBoxShape(new Ammo.btVector3(scale.x * 0.5, scale.y * 0.5, scale.z * 0.5));
+        colShape.setMargin(0.05);
+
+        let localInertia = new Ammo.btVector3(0, 0, 0);
+        colShape.calculateLocalInertia(mass, localInertia);
+
+        let rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape, localInertia);
+        let body = new Ammo.btRigidBody(rbInfo);
+
+        body.setFriction(100);
+        body.setRollingFriction(1);
+
+        body.setActivationState(STATE.DISABLE_DEACTIVATION);
+        body.setCollisionFlags(FLAGS.CF_KINEMATIC_OBJECT);
+
+
+        physicsWorld.addRigidBody(body);
+        winBoxObject.userData.physicsBody = body;
+        }
+
+    
+
+
+        function setupContactPairResultCallback() {
+        let dispatcher = physicsWorld.getDispatcher();
+        let numManifolds = dispatcher.getNumManifolds();
+
+  // Iterate through all the manifolds
+  for (let i = 0; i < numManifolds; i++) {
+    let contactManifold = dispatcher.getManifoldByIndexInternal(i);
+    let numContacts = contactManifold.getNumContacts();
+
+    // Iterate through all the contacts in the manifold
+    for (let j = 0; j < numContacts; j++) {
+      let contactPoint = contactManifold.getContactPoint(j);
+      let distance = contactPoint.getDistance();
+
+      if (distance <= 0) {
+        let colObj0 = contactManifold.getBody0();
+        let colObj1 = contactManifold.getBody1();
+
+        let userData0 = colObj0.getUserData();
+        let userData1 = colObj1.getUserData();
+
+        if (userData0 === ballObject.userData || userData1 === ballObject.userData) {
+        console.log("You win");
+        }
+      }
+    }
+  }
+}
+
+
 
 
 
