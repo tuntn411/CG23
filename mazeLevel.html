@@ -14,13 +14,19 @@
     <audio id="background-music" src="background_music.mp3" loop></audio>
 
     <div id="timer-container"><div id="timer">00:00</div></div>
-    
+
+    <div id="game-over" class="hidden">
+      <h2>Game Over</h2>
+      <p>Time is up!</p>
+    </div>
+
     <div class="introduction">
-        <h2>Introduction</h2>
-        <p> Welcome to the Maze game!
-            Get ready to navigate through twisting corridors and hidden traps 
-            all while racing against the clock.</p>
-        <p> W : Forword S : Backword A : Left D : Right</p>
+      <h2>Introduction</h2>
+      <p>
+        Welcome to the Maze game! Get ready to navigate through twisting
+        corridors and hidden traps all while racing against the clock.
+      </p>
+      <p>W : Forword S : Backword A : Left D : Right</p>
     </div>
 
     <script type="importmap">
@@ -32,13 +38,13 @@
       }
     </script>
     <script>
-        const audio = document.getElementById('background-music');
-      
-        document.addEventListener('keydown', () => {
-          audio.play();
-          document.removeEventListener('keydown', startAudioPlayback); // Remove the event listener after the first user interaction
-        });
-      </script>
+      const audio = document.getElementById("background-music");
+
+      document.addEventListener("keydown", () => {
+        audio.play();
+        document.removeEventListener("keydown", startAudioPlayback); // Remove the event listener after the first user interaction
+      });
+    </script>
     <script src="build/ammo.js"></script>
     <script id="fragmentShader" type="x-shader/x-fragment">
       varying vec3 v_Normal;
@@ -102,7 +108,6 @@
 
         createLevel();
         setupContactPairResultCallback();
-        
 
         setupEventHandlers();
         startTimer();
@@ -180,13 +185,9 @@
         renderer.shadowMap.enabled = true;
 
         controls = new OrbitControls(camera, renderer.domElement);
-        
-        
-    }
-
+      }
 
       function renderFrame() {
-       
         let deltaTime = clock.getDelta();
 
         moveBall();
@@ -227,10 +228,18 @@
         if (countdownMinutes === 0 && countdownSeconds === 0) {
           clearInterval(countdownInterval);
           // Timer has reached 0, perform any desired actions here
+          showGameOverMessage();
           const audioElement = document.getElementById("background-music");
-        audioElement.pause();
+          audioElement.pause();
         }
       }
+
+      function showGameOverMessage() {
+        const gameOverMessage = document.getElementById("game-over");
+        gameOverMessage.classList.remove("hidden");
+        isGameOver = true;
+      }
+
       function setupEventHandlers() {
         window.addEventListener("keydown", handleKeyDown, false);
         window.addEventListener("keyup", handleKeyUp, false);
@@ -321,10 +330,10 @@
         let mass = objMass;
 
         //threeJS Section
-        let ball = ballObject = new THREE.Mesh(
+        let ball = (ballObject = new THREE.Mesh(
           new THREE.SphereGeometry(radius),
           new THREE.MeshPhongMaterial({ color: 0xff0505 })
-        );
+        ));
 
         ball.position.set(pos.x, pos.y, pos.z);
 
@@ -367,7 +376,6 @@
         ball.userData.physicsBody = body;
         rigidBodies.push(ball);
         //console.log(typeof Ammo);
-
       }
 
       function createLevel() {
@@ -484,7 +492,6 @@
         physicsWorld.addRigidBody(body);
         boxObject.userData.physicsBody = body;
         //console.log(typeof Ammo);
-
       }
 
       function createWinBox(
@@ -559,8 +566,6 @@
         //console.log(typeof Ammo);
         //console.log(Ammo.ConcreteContactResultCallback);
         //console.log(Ammo.btManifoldPoint);
-
-
       }
 
       function moveBall() {
@@ -620,37 +625,42 @@
 
         }
         */
-    //collision detection
-    function setupContactPairResultCallback(){
-            cbContactPairResult = new Ammo.ConcreteContactResultCallback();
-            cbContactPairResult.hasContact = false;
+      //collision detection
+      function setupContactPairResultCallback() {
+        cbContactPairResult = new Ammo.ConcreteContactResultCallback();
+        cbContactPairResult.hasContact = false;
 
-            cbContactPairResult.addSingleResult = function(cp, colObj0Wrap, partId0, index0, colObj1Wrap, partId1, index1){
-            let contactPoint = Ammo.wrapPointer (cp, Ammo.btManifoldPoint);
-            
-            const distance = contactPoint.getDistance();
+        cbContactPairResult.addSingleResult = function (
+          cp,
+          colObj0Wrap,
+          partId0,
+          index0,
+          colObj1Wrap,
+          partId1,
+          index1
+        ) {
+          let contactPoint = Ammo.wrapPointer(cp, Ammo.btManifoldPoint);
 
-            if(distance>0) return;
-            this.hasContact = true;
-            
-            }
-            
+          const distance = contactPoint.getDistance();
 
-        }
+          if (distance > 0) return;
+          this.hasContact = true;
+        };
+      }
 
-        function contact(){
-            cbContactPairResult.hasContact = false;
+      function contact() {
+        cbContactPairResult.hasContact = false;
 
-            physicsWorld.contactPairTest(
-                ball.userData.physicsBody,
-                winBoxObject.userData.physicsBody,
-                cbContactPairResult);
-                //console.log(cbContactPairResult);
+        physicsWorld.contactPairTest(
+          ball.userData.physicsBody,
+          winBoxObject.userData.physicsBody,
+          cbContactPairResult
+        );
+        //console.log(cbContactPairResult);
 
-                if(!cbContactPairResult.hasContact) return;
+        if (!cbContactPairResult.hasContact) return;
+      }
 
-        }
-        
       function updatePhysics(deltaTime) {
         // Step world
         physicsWorld.stepSimulation(deltaTime, 10);
@@ -668,8 +678,6 @@
             objThree.quaternion.set(q.x(), q.y(), q.z(), q.w());
           }
         }
-
-        
       }
     </script>
   </body>
